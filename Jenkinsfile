@@ -15,7 +15,7 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git url: 'https://github.com/Navateja-gogula/use_case-3.git', branch: 'main'
+                git url: 'https://github.com/Navateja-gogula/usecase3_rollback.git', branch: 'main'
             }
         }
 
