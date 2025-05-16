@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         LOCAL_SERVER = 'tcp:10.128.0.16,1433'
-        REMOTE_SERVER = 'tcp:10.128.0.19,1433'
+        REMOTE_SERVER = 'tcp:10.128.0.19'
         LOCAL_DB = 'aspnet_DB'
         REMOTE_DB = 'aspnet_DB'
         LOCAL_TABLE = 'asp_user'
