@@ -37,7 +37,7 @@ $localConnStr = "Server=$LocalServer;Database=$LocalDB;User Id=$User;Password=$L
 $remoteConnStr = "Server=$RemoteServer;Database=$RemoteDB;User Id=$User;Password=$RemotePassword;"
 
 # Read data from local table
-$selectQuery = "SELECT user_id, user_name, email FROM $LocalTable"
+$selectQuery = "SELECT user_id, user_name, user_email FROM $LocalTable"
 $localData = Execute-Query -connectionString $localConnStr -query $selectQuery
 
 $insertedUserIds = @()
@@ -46,9 +46,9 @@ $rollbackTriggered = $false
 foreach ($row in $localData.Rows) {
     $userId = $row.user_id
     $userName = $row.user_name
-    $email = $row.email
+    $email = $row.user_email
 
-    $insertQuery = "INSERT INTO $RemoteTable (user_id, user_name, email) VALUES ('$userId', '$userName', '$email')"
+    $insertQuery = "INSERT INTO $RemoteTable (user_id, user_name, user_email) VALUES ('$userId', '$userName', '$email')"
 
     try {
         Execute-NonQuery -connectionString $remoteConnStr -query $insertQuery
