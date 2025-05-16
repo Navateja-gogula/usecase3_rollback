@@ -24,7 +24,7 @@ pipeline {
             steps {
                 powershell '''
                     # Call your existing insert script and capture inserted user_ids for rollback
-                    $insertedUserIds = ./Copy-Data.ps1 `
+                    $insertedUserIds = ./Rollback-Data.ps1 `
                         -LocalServer "$env:LOCAL_SERVER" `
                         -RemoteServer "$env:REMOTE_SERVER" `
                         -LocalDB "$env:LOCAL_DB" `
