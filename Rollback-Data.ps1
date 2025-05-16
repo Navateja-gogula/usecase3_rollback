@@ -44,15 +44,15 @@ $insertedUserIds = @()
 $rollbackTriggered = $false
 
 foreach ($row in $localData.Rows) {
-    $userId = $row.user_id
-    $userName = $row.user_name
-    $email = $row.user_email
+    $userId = $row.Item("user_id")
+    $userName = $row.Item("user_name")
+    $email = $row.Item("user_email")
 
     # Debug log
     Write-Host "Read user_id: '$userId', user_name: '$userName', user_email: '$email'"
 
-    # Proper check for missing/null/empty user_id
-    if ($null -eq $userId -or $userId -eq "") {
+    # Check for missing/empty/null user_id
+    if ([string]::IsNullOrWhiteSpace($userId)) {
         Write-Host "Skipping insert due to missing user_id."
         continue
     }
@@ -65,7 +65,6 @@ foreach ($row in $localData.Rows) {
         $insertedUserIds += $userId
     }
     catch {
-        # Check if error message contains primary key violation
         if ($_.Exception.Message -match "Violation of PRIMARY KEY constraint") {
             Write-Host "Duplicate user_id found: $userId. Triggering rollback."
             $rollbackTriggered = $true
@@ -79,7 +78,7 @@ foreach ($row in $localData.Rows) {
     }
 }
 
-# Handle rollback if any error occurred
+# Handle rollback if needed
 if ($rollbackTriggered -and $insertedUserIds.Count -gt 0) {
     $userIdsCsv = "'" + ($insertedUserIds -join "','") + "'"
     $deleteQuery = "DELETE FROM $RemoteTable WHERE user_id IN ($userIdsCsv)"
