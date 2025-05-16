@@ -48,8 +48,12 @@ foreach ($row in $localData.Rows) {
     $userName = $row.user_name
     $email = $row.user_email
 
-    if (-not $userId) {
-        Write-Host "Skipping insert due to missing or invalid user_id."
+    # Debug log
+    Write-Host "Read user_id: '$userId', user_name: '$userName', user_email: '$email'"
+
+    # Proper check for missing/null/empty user_id
+    if ($null -eq $userId -or $userId -eq "") {
+        Write-Host "Skipping insert due to missing user_id."
         continue
     }
 
@@ -75,6 +79,7 @@ foreach ($row in $localData.Rows) {
     }
 }
 
+# Handle rollback if any error occurred
 if ($rollbackTriggered -and $insertedUserIds.Count -gt 0) {
     $userIdsCsv = "'" + ($insertedUserIds -join "','") + "'"
     $deleteQuery = "DELETE FROM $RemoteTable WHERE user_id IN ($userIdsCsv)"
@@ -85,5 +90,5 @@ if ($rollbackTriggered -and $insertedUserIds.Count -gt 0) {
 }
 elseif (-not $rollbackTriggered) {
     $result = $insertedUserIds -join ','
-    Write-Output $result  # output for Jenkins tracking
+    Write-Output $result  # Output for Jenkins tracking
 }
