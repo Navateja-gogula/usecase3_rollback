@@ -9,7 +9,8 @@ pipeline {
         LOCAL_TABLE = 'asp_user'
         REMOTE_TABLE = 'asp_user'
         SA_USER = 'sa'
-        SA_PASS = 'P@ssword@123' // Store securely in Jenkins Credentials ideally
+        LOCAL_PASS = 'P@ssword@123'  // Ideally use Jenkins credentials
+        REMOTE_PASS = 'Password@123' // Ideally use Jenkins credentials
     }
 
     stages {
@@ -31,11 +32,10 @@ pipeline {
                         -LocalTable "$env:LOCAL_TABLE" `
                         -RemoteTable "$env:REMOTE_TABLE" `
                         -User "$env:SA_USER" `
-                        -Password "$env:SA_PASS"
+                        -LocalPassword "$env:LOCAL_PASS" `
+                        -RemotePassword "$env:REMOTE_PASS"
 
-                    # Assuming Copy-Data.ps1 outputs inserted user_ids (adjust script if needed)
                     Write-Output "Inserted User IDs: $insertedUserIds"
-                    # Save to file or environment variable if you want to pass to rollback
                     Set-Content -Path insertedUserIds.txt -Value $insertedUserIds
                 '''
             }
@@ -47,14 +47,13 @@ pipeline {
             }
             steps {
                 powershell '''
-                    # Read inserted user_ids from file
                     $userIds = Get-Content -Path insertedUserIds.txt
 
                     ./Rollback-Data.ps1 `
                         -Server "$env:REMOTE_SERVER" `
                         -Database "$env:REMOTE_DB" `
                         -User "$env:SA_USER" `
-                        -Password "$env:SA_PASS" `
+                        -RemotePassword "$env:REMOTE_PASS" `
                         -UserIdsToRollback $userIds
                 '''
             }
