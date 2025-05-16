@@ -37,7 +37,7 @@ $localConnStr = "Server=$LocalServer;Database=$LocalDB;User Id=$User;Password=$L
 $remoteConnStr = "Server=$RemoteServer;Database=$RemoteDB;User Id=$User;Password=$RemotePassword;"
 
 # Read data from local table
-$selectQuery = "SELECT user_id, user_name, user_email FROM $LocalTable"
+$selectQuery = "SELECT user_id, user_name, user_email FROM dbo.$LocalTable"
 $localData = Execute-Query -connectionString $localConnStr -query $selectQuery
 
 $insertedUserIds = @()
