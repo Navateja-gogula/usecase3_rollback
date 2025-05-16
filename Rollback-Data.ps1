@@ -40,19 +40,35 @@ $remoteConnStr = "Server=$RemoteServer;Database=$RemoteDB;User Id=$User;Password
 $selectQuery = "SELECT user_id, user_name, user_email FROM dbo.$LocalTable"
 $localData = Execute-Query -connectionString $localConnStr -query $selectQuery
 
+# Optional: Debug full data table
+Write-Host "`n--- Retrieved Data Preview ---"
+$localData | Format-Table -AutoSize
+Write-Host "-----------------------------------`n"
+
 $insertedUserIds = @()
 $rollbackTriggered = $false
 
 foreach ($row in $localData.Rows) {
-    $userId = $row.Item("user_id")
-    $userName = $row.Item("user_name")
-    $email = $row.Item("user_email")
+    if ($null -eq $row) {
+        Write-Host "Skipping null row."
+        continue
+    }
+
+    if (-not $row.Table.Columns.Contains("user_id") -or 
+        -not $row.Table.Columns.Contains("user_name") -or 
+        -not $row.Table.Columns.Contains("user_email")) {
+        Write-Host "Required columns missing in row. Skipping."
+        continue
+    }
+
+    $userId = $row["user_id"]
+    $userName = $row["user_name"]
+    $email = $row["user_email"]
 
     # Debug log
     Write-Host "Read user_id: '$userId', user_name: '$userName', user_email: '$email'"
 
-    # Check for missing/empty/null user_id
-    if ([string]::IsNullOrWhiteSpace($userId)) {
+    if ([string]::IsNullOrEmpty($userId)) {
         Write-Host "Skipping insert due to missing user_id."
         continue
     }
@@ -78,7 +94,7 @@ foreach ($row in $localData.Rows) {
     }
 }
 
-# Handle rollback if needed
+# Handle rollback if any error occurred
 if ($rollbackTriggered -and $insertedUserIds.Count -gt 0) {
     $userIdsCsv = "'" + ($insertedUserIds -join "','") + "'"
     $deleteQuery = "DELETE FROM $RemoteTable WHERE user_id IN ($userIdsCsv)"
